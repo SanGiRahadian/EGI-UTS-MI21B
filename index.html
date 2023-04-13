@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UTS-EGI-FN</title>
+  <style>
+    table,
+    tr,
+    th,
+    td {
+      border: 1px solid black;
+      padding: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <h3>Bakso Japri</h3>
+  <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+  <p>Nama Pesanan <input id="name" type="text" placeholder="Isi nama disini..."></p>
+  <div>
+
+    <table style="margin-top: 10px">
+        <thead>
+            
+     
+            <th>
+                <img src="https://www.apacara.com/logo.png" alt="logo apacara.com" />
+            <h3>Mie Bakso Halus</h3>
+            <p>Rp.10000</p>
+            <button id="button" onclick="tambahPesanan()">Pesan</button>
+            <th>
+                <img src="https://www.apacara.com/logo.png" alt="logo apacara.com" />
+                <h3>Mie Bakso Bulat</h3>
+                <p>Rp.15000</p>
+                <button id="button" onclick="tambahPesanan()">Pesan</button>
+                <th>
+                    <img src="https://www.apacara.com/logo.png" alt="logo apacara.com" />
+                    <h3>Mie Bakso Urat</h3>
+                    <p>Rp.17000</p>
+                    <button id="button" onclick="tambahPesanan()">Pesan</button>
+        </th>
+        
+        
+        </thead>
+      </table>
+
+  </div>
+  <table style="margin-top: 10px">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama</th>
+        <th>Pesanan</th>
+        <th>Jumlah</th>
+        <th>Harga</th>
+        <th>Total</th>
+        <th>Aksi</th>
+      </tr>
+     
+    </thead>
+    <tbody id="result"></tbody>
+    <th>Total</th>
+  </table>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+
+    const editData = (id, name, pesanan,jumlah, harga, Total) => {
+      document.getElementById('name').value = name;
+      document.getElementById('pesanan').value = pesanan;
+      document.getElementById('prodi').value =jumlah;
+      document.getElementById('harga').value = harga;
+      document.getElementById('total').value = total;
+      document.getElementById('button').innerText = 'Ubah';
+      document.getElementById('button').setAttribute('onclick', `updateData(${id})`);
+    }
+
+    const updateData = async (id) => {
+      let nameForm = document.getElementById('name').value;
+      let pesananForm = document.getElementById('pesanan').value;
+      let jumlahForm = document.getElementById('prodi').value;
+      let text = "Betul data akan diupdate?"
+      if (confirm(text) == true) {
+        await axios.patch(`http://localhost:3000/orders/${id}`, {
+          name: nameForm,
+          pesanan: pesananForm,
+         jumlahForm
+        })
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((error) => {
+            console.log(error.message);
+          });
+      }
+
+    }
+
+    const saveData = async () => {
+      let nameForm = document.getElementById('name').value;
+      let schoolForm = document.getElementById('school').value;
+      let prodiForm = document.getElementById('prodi').value;
+      await axios.post(`http://localhost:3000/students`, {
+        name: nameForm,
+        school: schoolForm,
+        prodi: prodiForm
+      })
+        .then((response) => {
+          alert('sukses')
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(error.message);
+        });
+    }
+    
+
+    const cancleData = async (id) => {
+      let text = "Betul data akan dihapus?";
+      if (confirm(text) == true) {
+        await axios.cancle(`http://localhost:3000/students/${id}`)
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((error) => {
+            console.log(error.message);
+          });
+      }
+
+
+    }
+
+    const tambahPesanan = async (id) => {
+      let nameForm = document.getElementById('name').value;
+      let priceForm = document.getElementById('price').value;
+     
+      let text = "Mie Bakso Babat ?"
+      if (confirm(text) == true) {
+        await axios.patch(`http://localhost:3000/menu/${id}`, {
+          name: nameForm,
+          price: priceForm,
+          
+        })
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((error) => {
+            console.log(error.message);
+          });
+      }
+
+    }
+        
+    getDataMenu();
+
+    const getDataOrders = async () => {
+    await axios.get(`http://localhost:3000/students`)
+      .then((response) => {
+        let bucket = ``;
+        let orders = response.data;
+
+        if (orders.length > 0) {
+          for (let i = 0; i < orders.length; i++) {
+            bucket += `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${orders[i].name}</td>
+              <td>${orders[i].pesanan}</td>
+              <td>${orders[i].jumlah}</td>
+              <td>
+                <button onclick="editData('${orders[i].id}','${orders[i].name}','${orders[i].school}','${orders[i].prodi}')">edit</button>
+                <button onclick="deleteData(${orders[i].id})">delete</button>
+              </td>
+            </tr>`
+          }
+        } else {
+          bucket += `
+            <tr>
+              <td colspan="5" style="text-align: center">Data tidak ditemukan</td>
+            </tr>
+          `
+        }
+
+          document.getElementById('result').innerHTML = bucket;
+        })
+        .catch((error) => {
+          let bucket = `
+          <tr>
+            <td colspan="5" style="text-align: center">${error.message}</td>
+          </tr>
+        `
+          document.getElementById('result').innerHTML = bucket;
+        });
+    }
+    getDataOrders();
+  </script>
+</body>
+
+
+
+
